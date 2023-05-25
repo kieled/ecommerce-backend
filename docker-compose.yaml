@@ -1,0 +1,60 @@
+version: '3.9'
+
+services:
+  db:
+    image: postgres:15.1-alpine
+    env_file:
+      - .env
+    volumes:
+      - postgres_data:/var/lib/postgresql/data/
+
+  app:
+    expose:
+      - 8000
+    build:
+      context: ./services/api
+      dockerfile: ../../docker/api.Dockerfile
+    depends_on:
+      - db
+    env_file:
+      - .env
+    volumes:
+      - ./services/api:/api
+      - ./lib/shared:/api/shared
+      - ./assets:/assets
+
+  instagram:
+    expose:
+      - 8000
+    build:
+      context: ./services/inst
+      dockerfile: ../../docker/inst.Dockerfile
+    env_file:
+      - .env
+    volumes:
+      - ./services/inst:/inst
+      - ./assets:/assets
+
+  payment:
+    expose:
+      - 8000
+    build:
+      context: ./services/payment
+      dockerfile: ../../docker/payment.Dockerfile
+    env_file:
+      - .env
+    volumes:
+      - ./services/payment:/payment
+      - ./assets:/assets
+
+  rabbit:
+    image: rabbitmq:3.11.16-management-alpine
+    env_file:
+      - .env
+    volumes:
+      - ./rabbitmq/delayed_message_exchange.ez:/opt/rabbitmq/plugins/delayed_message.ez
+      - ./rabbitmq/enabled:/etc/rabbitmq/enabled_plugins
+
+
+volumes:
+  postgres_data:
