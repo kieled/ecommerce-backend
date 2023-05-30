@@ -1,12 +1,13 @@
 import logging
 
+import aiohttp
 from sqlalchemy import update
 
 from shared.db import Transaction, TransactionStatusEnum, scoped_session
 from .telegram import admin_message
 
 
-async def send_payment_request(
+async def _send_payment_request(
         transaction_id: int,
         amount: int,
         payment_type: str,
@@ -51,7 +52,7 @@ async def check(
         payment_type: str,
         latest_ids: list[str]
 ):
-    bank_id = await send_payment_request(transaction_id, amount, payment_type, latest_ids)
+    bank_id = await _send_payment_request(transaction_id, amount, payment_type, latest_ids)
     if bank_id:
         await admin_message()
         admin_chat_id = loop.run_until_complete(get_current_admin_chat())

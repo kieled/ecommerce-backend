@@ -9,7 +9,7 @@ from sqlalchemy.orm import mapped_column, Mapped, relationship
 class Transaction(Base):
     from .order import Order
     from .user import User
-    
+
     __tablename__ = 'transactions'
 
     id: Mapped[int] = mapped_column(primary_key=True)
@@ -19,7 +19,7 @@ class Transaction(Base):
     amount: Mapped[int]
     user_id: Mapped[int | None] = mapped_column(ForeignKey('users.id'))
     temp_user_id: Mapped[str | None]
-    requisite_id: Mapped[int] = mapped_column(ForeignKey('requisites.id'))
+    requisite_id: Mapped[int] = mapped_column(ForeignKey('transactions.id'))
     bank_number_id: Mapped[str | None]
 
     updated_at: Mapped[datetime] = mapped_column(
@@ -60,7 +60,7 @@ class RequisiteTypes(Base):
 
 
 class Requisites(Base):
-    __tablename__ = 'requisites'
+    __tablename__ = 'transactions'
 
     id: Mapped[int] = mapped_column(primary_key=True)
 

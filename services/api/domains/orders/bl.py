@@ -4,73 +4,66 @@ import random
 
 from alchemy_graph import strawberry_to_dict
 from sqlalchemy import select, insert
+from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import load_only, joinedload
 from shared.localizations import telegram as localizations
-from shared.db import User, Order, CustomerAddress, Transaction, Requisites, Product, TransactionCurrencyEnum, Promo, \
-    RequisiteTypes, TransactionStatusEnum
+from shared.db import Order, CustomerAddress, Transaction, Requisites, Product, TransactionCurrencyEnum, Promo, \
+    RequisiteTypes, TransactionStatusEnum, cls_session
 from api import schemas
-from api.utils import get_user_ids
+from api.utils import get_user_ids, AppService
 from shared.schemas import MessageSchema
-from .customers import CustomerService
-from .mixins import AppService
-from ..config import rabbit_connection
+from . import sql
+from api.config import rabbit_connection
 
 
-class OrderService(AppService):
-    def __init__(self, db, info, *args):
-        super().__init__(db, Order, info, *args)
+@cls_session
+class OrderBL(AppService[Order]):
+    def __init__(self, info, *args, **kwargs):
+        super().__init__(Order, info, *args, **kwargs)
 
-    async def send_message(self, order_id: int, message: str):
-        sql = select(Order).options(
-            load_only(Order.id),
-            joinedload(Order.customer_address).load_only(
-                CustomerAddress.id
-            ).joinedload(CustomerAddress.user).load_only(
-                User.telegram_chat_id
-            )
-        ).where(
-            Order.id == order_id
-        )
-
-        order = (await self.db.execute(sql)).scalars().first()
+    @staticmethod
+    async def send_message(order_id: int, message: str, session=None) -> None:
+        query = sql.order_telegram_ids(order_id)
+        order = (await session.execute(query)).scalars().first()
 
         if order and order.customer_address.user.telegram_chat_id:
-            await rabbit_connection.send_messages(MessageSchema(action='telegram:order_message', body={
-                'telegram_chat_id': order.customer_address.user.telegram_chat_id,
-                'order_id': order.id,
-                'message': message
-            }))
+            await rabbit_connection.send_messages(MessageSchema(
+                action='telegram:order_message',
+                body={
+                    'telegram_chat_id': order.customer_address.user.telegram_chat_id,
+                    'order_id': order.id,
+                    'message': message
+                }
+            ))
 
-    async def list(self):
-        filters = [
-            Order.transaction.has(Transaction.status == TransactionStatusEnum.complete)
-        ]
-        return await self.list_items('items', filters)
+    async def list(self, session: AsyncSession = None):
+        filters = (Order.transaction.has(Transaction.status == TransactionStatusEnum.complete),)
+        return await self.list_items(session, 'items', filters)
 
-    async def detail(self, order_id: int):
-        order = await self.fetch_one(order_id)
+    async def detail(self, order_id: int, session: AsyncSession = None):
+        order = await self.fetch_one(order_id, session)
         if not order:
             raise Exception('Not found')
         return order
 
-    async def update(self, payload: schemas.UpdateOrderInput):
+    async def update(self, payload: schemas.UpdateOrderInput, session: AsyncSession = None):
         update_dict = strawberry_to_dict(payload, exclude={'order_id'}, exclude_none=True)
-        if payload.order_url:
+        message = {
+            'order_url': localizations.order_confirmed_message,
+            'track_code': localizations.track_code_message(payload.track_code or '')
+        }
+        if payload.order_url or payload.track_code:
             await self.send_message(
                 payload.order_id,
-                localizations.order_confirmed_message
-            )
-        if payload.track_code:
-            await self.send_message(
-                payload.order_id,
-                localizations.track_code_message(payload.track_code)
+                message['order_url'] if payload.order_id else message['track_code']
             )
         await self.update_item(
             payload.order_id,
-            update_dict
+            update_dict,
+            session=session
         )
 
-    async def create(self, payload: schemas.CreateOrderInput):
+    async def create(self, payload: schemas.CreateOrderInput, session: AsyncSession = None):
         temp_user_id, user_id = get_user_ids(self.info)
 
         if not temp_user_id and not user_id:
@@ -80,11 +73,11 @@ class OrderService(AppService):
             raise Exception('You should use only address or address_id fields')
 
         if payload.address:
-            address_id = await CustomerService(self.db, self.info).create_address(payload.address, temp_user_id)
+            address_id = await CustomerService(session, self.info).create_address(payload.address, temp_user_id)
         else:
             address_id = payload.address_id
 
-        address = (await self.db.execute(
+        address = (await session.execute(
             select(CustomerAddress.id).where(CustomerAddress.id == address_id)
         )).scalars().first()
 
@@ -97,9 +90,9 @@ class OrderService(AppService):
                 Promo.code == payload.promo,
                 ~Promo.transaction.has()
             )
-            promo = (await self.db.execute(sql)).scalars().first()
+            promo = (await session.execute(sql)).scalars().first()
 
-        product_prices = (await self.db.execute(
+        product_prices = (await session.execute(
             select(Product).options(
                 load_only(Product.price)
             ).where(
@@ -126,17 +119,17 @@ class OrderService(AppService):
             Requisites.is_active == True
         )
 
-        requisite = (await self.db.execute(sql)).scalars().first()
+        requisite = (await session.execute(sql)).scalars().first()
 
         if not requisite:
-            raise Exception('Not any requisites available now')
+            raise Exception('Not any transactions available now')
 
         currency_type = TransactionCurrencyEnum(requisite.type.currency).value if requisite.type.currency else None
 
         if promo:
             amount = math.ceil(amount - amount * promo.discount)
 
-        transaction_id = (await self.db.execute(
+        transaction_id = (await session.execute(
             insert(Transaction).values(
                 amount=amount,
                 promo_id=promo.id if promo else None,
@@ -150,7 +143,7 @@ class OrderService(AppService):
         if not transaction_id:
             raise Exception("Order couldn't be created")
 
-        await self.db.execute(
+        await session.execute(
             insert(Order).values([
                 dict(
                     count=i.count,
@@ -163,5 +156,5 @@ class OrderService(AppService):
             ])
         )
 
-        await self.db.commit()
+        await session.commit()
         return dict(id=transaction_id, temp_id=temp_user_id, user_id=user_id)

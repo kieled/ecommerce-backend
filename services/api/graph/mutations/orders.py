@@ -7,7 +7,6 @@ from api.config import rabbit_connection
 from api.schemas import UpdateOrderInput, CreateOrderInput, CreatedOrderIdType
 from api.services import OrderService, TransactionService
 from api.utils import IsAdmin
-from shared.db import scoped_session
 from shared.schemas import MessageSchema
 
 
@@ -23,8 +22,7 @@ class OrderMutation:
             info: Info
     ) -> None:
         """ Update order mutation """
-        async with scoped_session() as s:
-            return await OrderService(s, info).update(order)
+        return await OrderService(info).update(order)
 
     @strawberry.mutation(
         description='Create new order'
@@ -35,8 +33,7 @@ class OrderMutation:
             info: Info
     ) -> CreatedOrderIdType:
         """ Create order from cart """
-        async with scoped_session() as s:
-            data = await OrderService(s, info).create(payload)
+        data = await OrderService(info).create(payload)
         if data['temp_id'] and not data['user_id']:
             now = datetime.now()
             expires = int((datetime(
@@ -57,9 +54,8 @@ class OrderMutation:
             info: Info
     ) -> None:
         """ Confirm payment public order """
-        async with scoped_session() as s:
-            args = await TransactionService(s, info).confirm_public_payment(order_id)
+        data = await TransactionService(info).confirm_public_payment(order_id)
         await rabbit_connection.send_messages(MessageSchema(
-            action='payment'
+            action='payment:check',
+            body=data
         ))
-        send_payment_check.apply_async(args=args)

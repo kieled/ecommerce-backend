@@ -11,7 +11,7 @@ from utils import IsAdmin
 class RequisitesMutation:
     @strawberry.mutation(
         permission_classes=[IsAdmin],
-        description='Update requisites info'
+        description='Update transactions info'
     )
     async def update_requisite(
             self,

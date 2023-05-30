@@ -41,15 +41,12 @@ class RabbitConnection:
             delay: int = None
     ) -> None:
         async with self._channel.transaction():
-            headers = None
-            if delay:
-                headers = {
-                    'x-delay': f'{delay * 1000}'
-                }
             for message in messages:
                 message = Message(
                     body=json.dumps(message.dict()).encode(),
-                    headers=headers
+                    headers={
+                        'x-delay': f'{delay * 1000}'
+                    } if delay else None
                 )
                 await self._exchange.publish(
                     message,

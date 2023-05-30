@@ -1,12 +1,13 @@
-import utils
-from models import RequisiteTypes
-from schemas import RequisiteTypeItemInput, RequisiteTypeCreateInput
+from alchemy_graph import strawberry_to_dict
+
+from shared.db import RequisiteTypes
+from api.schemas import RequisiteTypeItemInput, RequisiteTypeCreateInput
 from .mixins import AppService
 
 
 class RequisiteTypesService(AppService):
-    def __init__(self, db, *args):
-        super().__init__(db, RequisiteTypes, *args)
+    def __init__(self, *args, **kwargs):
+        super().__init__(RequisiteTypes, *args, **kwargs)
 
     async def list(self):
         return await self.fetch_all()

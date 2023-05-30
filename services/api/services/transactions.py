@@ -1,15 +1,16 @@
 from datetime import datetime, timedelta
 from sqlalchemy import update, select, func
 from sqlalchemy.orm import load_only, joinedload
-from shared.db import Transaction, TransactionStatusEnum, Requisites, RequisiteTypes
+from shared.db import Transaction, TransactionStatusEnum, Requisites, RequisiteTypes, cls_session
 from api.schemas import transaction_status_enum
 from api.utils import get_user_ids
 from .mixins import AppService
 
 
+@cls_session
 class TransactionService(AppService):
-    def __init__(self, db, info, *args):
-        super().__init__(db, Transaction, info, *args)
+    def __init__(self, info, *args, **kwargs):
+        super().__init__(Transaction, info, *args, **kwargs)
 
     def _filters(self, transaction_id: int) -> tuple:
         temp_user_id, user_id = get_user_ids(self.info)
@@ -41,7 +42,7 @@ class TransactionService(AppService):
             [Transaction.status == TransactionStatusEnum(status.value)] if status else None
         )
 
-    async def confirm_public_payment(self, transaction_id: int) -> list:
+    async def confirm_public_payment(self, transaction_id: int, session=None) -> dict:
         sql = select(Transaction).options(
             load_only(Transaction.amount),
             joinedload(
@@ -52,7 +53,7 @@ class TransactionService(AppService):
         ).where(
             Transaction.id == transaction_id
         )
-        current_transaction = (await self.db.execute(sql)).scalars().first()
+        current_transaction = (await session.execute(sql)).scalars().first()
 
         if not current_transaction:
             raise Exception('Order not found')
@@ -64,7 +65,7 @@ class TransactionService(AppService):
             Transaction.status == TransactionStatusEnum.complete,
             Transaction.updated_at > from_data
         )
-        latest_ids = (await self.db.execute(sql)).scalars().all()
+        latest_ids = (await session.execute(sql)).scalars().all()
 
         sql = update(Transaction).where(
             *self._filters(transaction_id),
@@ -73,12 +74,17 @@ class TransactionService(AppService):
             status=TransactionStatusEnum.confirmed
         )
 
-        await self.db.execute(sql)
-        await self.db.commit()
+        await session.execute(sql)
+        await session.commit()
 
         payment_type = 'bnb' if current_transaction.requisite.type.detail == 'ЕРИП' else 'ya'
 
-        return [transaction_id, current_transaction.amount, payment_type, [str(i) for i in latest_ids]]
+        return dict(
+            transaction_id=transaction_id,
+            amount=current_transaction.amount,
+            payment_type=payment_type,
+            latest_ids=[str(i) for i in latest_ids]
+        )
 
     async def public_list(self):
         temp_user_id, user_id = get_user_ids(self.info)

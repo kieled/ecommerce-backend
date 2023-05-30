@@ -33,14 +33,14 @@ def center_image(image: Image) -> Image:
 
 
 def stamp_watermark(image: Image) -> Image:
-    logo = Image.open(os.path.join(os.path.join(os.getcwd(), 'assets'), 'watermark.png'))
+    logo = Image.open('/assets/watermark.png')
 
     image.paste(logo, (0, int(image.height / 2 - logo.height / 2)), logo)
     return image
 
 
 def get_image_path(product_id: int, folder: str, name: str):
-    path = os.path.join(os.getcwd(), f'assets/aliexpress/{product_id}/')
+    path = os.path.join(os.getcwd(), f'/assets/aliexpress/{product_id}/')
     end_path = os.path.join(path, folder)
     if not os.path.exists(path):
         os.mkdir(path)
@@ -60,7 +60,7 @@ async def handle_image(
         filename: str | None = None,
 ) -> str:
     if input_img.file:
-        path = os.path.join(os.getcwd(), f'assets{input_img.file}')
+        path = f'/assets{input_img.file}'
         image = Image.open(path)
     else:
         async with session.get(input_img.url) as r:
@@ -92,12 +92,12 @@ def download_images(
 
 def get_local_images(product_id: int):
     def get_folder_list(folder: str, folder_path: str):
-        return [f'{root_path}/{folder}/{name}' for name in os.listdir(f'{folder_path}/{folder}')]
+        return [f'{folder_path}/{folder}/{name}' for name in os.listdir(f'{folder_path}/{folder}')]
 
     def get_zip_path(full_path: str):
-        return full_path.split(f'/app/assets/aliexpress/{product_id}/')[1]
+        return full_path.split(f'/assets/aliexpress/{product_id}/')[1]
 
-    root_path = f'{os.getcwd()}/assets/aliexpress/{product_id}'
+    root_path = f'/assets/aliexpress/{product_id}'
     colors_images = get_folder_list('colors', root_path)
     default_images = get_folder_list('default', root_path)
     all_images = [*colors_images, *default_images]

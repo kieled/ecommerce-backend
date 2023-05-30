@@ -1,0 +1,27 @@
+from alchemy_graph import strawberry_to_dict
+from sqlalchemy.ext.asyncio import AsyncSession
+
+from shared.db import ProductCategory, cls_session
+from api.schemas import UpdateProductCategoryInput, ProductCategoryInput
+from api.utils import AppService
+
+
+@cls_session
+class ProductCategoryService(AppService[ProductCategory]):
+    def __init__(self, info, *args):
+        super().__init__(ProductCategory, info, *args)
+
+    async def list(self, session: AsyncSession = None):
+        return await self.fetch_all(session)
+
+    async def create(self, payload: ProductCategoryInput, session: AsyncSession = None) -> ProductCategory:
+        payload_dict = strawberry_to_dict(payload)
+        return await self.create_item(payload_dict, session)
+
+    async def update(self, payload: UpdateProductCategoryInput, session: AsyncSession = None) -> dict:
+        payload_dict = strawberry_to_dict(payload, exclude={'id'})
+        await self.update_item(payload.id, payload_dict, session)
+        return strawberry_to_dict(payload)
+
+    async def delete(self, category_id: int, session: AsyncSession = None) -> None:
+        await self.delete_item(category_id, session)
