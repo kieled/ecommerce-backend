@@ -30,6 +30,8 @@ sqlalchemy = "2.0.15"
 alchemy-graph = "^0.1.2"
 aio-pika = "^9.0.7"
 tinydb = "^4.7.1"
+aiofiles = "^23.1.0"
+types-aiofiles = "^23.1.0.3"
 
 
 [build-system]

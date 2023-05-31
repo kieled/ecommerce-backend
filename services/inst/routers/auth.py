@@ -1,7 +1,8 @@
 import json
+import logging
 from typing import Optional, Dict
 from fastapi import APIRouter, Depends, Form
-from dependencies import ClientStorage, get_clients
+from inst.core import ClientStorage, get_clients
 
 router = APIRouter(
     prefix="/auth",
@@ -58,7 +59,8 @@ async def settings_set(
 ) -> str:
     try:
         cl = clients.get()
-    except Exception:
+    except Exception as e:
+        logging.info(e.__class__.__name__)
         cl = clients.client()
     cl.set_settings(json.loads(settings))
     cl.expose()

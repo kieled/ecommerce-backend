@@ -1,21 +1,8 @@
 from contextlib import asynccontextmanager
-
-import strawberry
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.staticfiles import StaticFiles
-from strawberry.fastapi import GraphQLRouter
-from strawberry.schema.config import StrawberryConfig
-
-from graph import Query, Mutation
-from router import router
-from utils import get_context
-from api.config import rabbit_connection
-
-strawberry_config = StrawberryConfig(auto_camel_case=True)
-
-schema = strawberry.Schema(Query, Mutation, config=strawberry_config)
-graphql_app = GraphQLRouter(schema, context_getter=get_context, graphiql=False)
+from api.routes import images_router, graphql_router
+from api.broker import rabbit_connection
 
 
 @asynccontextmanager
@@ -26,8 +13,8 @@ async def lifespan(_: FastAPI):
 
 
 app = FastAPI(lifespan=lifespan)
-app.include_router(graphql_app, prefix="/graphql")
-app.include_router(router, prefix='', tags=['Api'])
+app.include_router(graphql_router, prefix="/graphql")
+app.include_router(images_router, prefix='', tags=['Images'])
 
 origins = [
     "http://localhost:3000",
@@ -41,6 +28,3 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
-
-app.mount('/images', StaticFiles(directory="assets/aliexpress"), name="images")
-app.mount('/temp', StaticFiles(directory="assets/temp"), name="temp_images")

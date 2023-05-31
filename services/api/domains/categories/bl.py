@@ -2,12 +2,12 @@ from alchemy_graph import strawberry_to_dict
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from shared.db import ProductCategory, cls_session
-from api.schemas import UpdateProductCategoryInput, ProductCategoryInput
-from api.utils import AppService
+from .types import UpdateProductCategoryInput, ProductCategoryInput
+from api.domains.mixin import AbstractBL
 
 
 @cls_session
-class ProductCategoryService(AppService[ProductCategory]):
+class ProductCategoryBL(AbstractBL[ProductCategory]):
     def __init__(self, info, *args):
         super().__init__(ProductCategory, info, *args)
 

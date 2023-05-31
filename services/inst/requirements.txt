@@ -3,8 +3,6 @@ uvicorn==0.20.0
 instagrapi>=1.16.41
 python-multipart==0.0.5
 Pillow==9.4.0
-httpx==0.23.3
 ipdb==0.13.11
 aiofiles==23.1.0
-requests==2.28.2
 tinydb==4.7.1

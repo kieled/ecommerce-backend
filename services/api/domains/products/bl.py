@@ -5,13 +5,15 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from strawberry.types import Info
 
 from shared.db import Product, ProductImage, ProductStock, ProductSize, ProductParam, cls_session
-from api.schemas import ProductCreateInput, ProductUpdateInput, CreateOrderProductInput
-from api.utils import AppService, handle_image
+from .types import ProductCreateInput, ProductUpdateInput
+from api.domains.orders.types import CreateOrderProductInput
+from .features.images import handle_image
+from api.domains.mixin import AbstractBL
 from . import sql
 
 
 @cls_session
-class ProductBL(AppService[Product]):
+class ProductBL(AbstractBL[Product]):
     def __init__(self, info: Info, *args, **kwargs):
         super().__init__(Product, info, *args, **kwargs)
 

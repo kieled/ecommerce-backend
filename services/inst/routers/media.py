@@ -1,6 +1,5 @@
 from fastapi import APIRouter, Depends, Form
-
-from dependencies import ClientStorage, get_clients
+from inst.core import ClientStorage, get_clients
 
 router = APIRouter(
     prefix="/media",

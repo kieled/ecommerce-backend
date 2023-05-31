@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from models import CustomerAddress, Transaction
+from shared.db import CustomerAddress, Transaction
 from sqlalchemy import select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 

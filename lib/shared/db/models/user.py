@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from sqlalchemy import ForeignKey
 from sqlalchemy.orm import mapped_column, Mapped, relationship
 
@@ -20,12 +22,12 @@ class User(Base):
     image_url: Mapped[str | None]
     first_name: Mapped[str | None]
 
-    addresses: Mapped[list['CustomerAddress']] = relationship(
+    addresses: Mapped[list[CustomerAddress]] = relationship(
         lazy=True,
         back_populates='user'
     )
 
-    transactions: Mapped[list['Transaction']] = relationship(
+    transactions: Mapped[list[Transaction]] = relationship(
         lazy=True,
         back_populates='user'
     )
@@ -51,12 +53,12 @@ class CustomerAddress(Base):
     user_id: Mapped[int | None] = mapped_column(ForeignKey('users.id'))
     temp_user_id: Mapped[str | None]
 
-    user: Mapped['User'] = relationship(
+    user: Mapped[User] = relationship(
         lazy=True,
         back_populates='addresses'
     )
 
-    orders: Mapped[list['Order']] = relationship(
+    orders: Mapped[list[Order]] = relationship(
         lazy=True,
         back_populates='customer_address'
     )

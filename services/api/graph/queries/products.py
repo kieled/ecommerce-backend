@@ -49,7 +49,7 @@ class ProductQuery:
         description='Parse product info'
     )
     async def fetch_product(self, url: str) -> ProductParsedType:
-        """ Parse product info from aliexpress """
+        """ Parse product info from aliexpress_parser """
         return await aliexpress_parser(url)
 
     @strawberry.field(

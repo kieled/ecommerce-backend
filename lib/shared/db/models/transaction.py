@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from datetime import datetime
 
 from ..config import Base
@@ -27,22 +29,22 @@ class Transaction(Base):
         onupdate=func.now()
     )
 
-    promo: Mapped['Promo'] = relationship(
+    promo: Mapped[Promo] = relationship(
         lazy=True,
         back_populates='transaction'
     )
 
-    orders: Mapped[list['Order']] = relationship(
+    orders: Mapped[list[Order]] = relationship(
         lazy=True,
         back_populates='transaction'
     )
 
-    user: Mapped['User'] = relationship(
+    user: Mapped[User] = relationship(
         lazy=True,
         back_populates='transactions'
     )
 
-    requisite: Mapped['Requisites'] = relationship(
+    requisite: Mapped[Requisites] = relationship(
         lazy=True
     )
 

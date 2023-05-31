@@ -1,15 +1,17 @@
 from alchemy_graph import strawberry_to_dict
+from fastapi_jwt_auth.exceptions import MissingTokenError
 from sqlalchemy.ext.asyncio import AsyncSession
 from strawberry.types import Info
-from api.schemas import TelegramUserInput
+from .types import TelegramUserInput
 from shared.base import telegram_config
 from . import sql
 from shared.db import cls_session, User, UserTypeEnum
-from api.utils import AppService, verify_password, get_tokens, assign_response, telegram_hash_check
+from .features.auth import verify_password, get_tokens, assign_response, telegram_hash_check
+from api.domains.mixin import AbstractBL
 
 
 @cls_session
-class UsersBL(AppService[User]):
+class UsersBL(AbstractBL[User]):
     def __init__(self, info: Info, *args, **kwargs):
         super().__init__(User, info, *args, **kwargs)
 
@@ -76,15 +78,12 @@ class UsersBL(AppService[User]):
         """ Refresh token """
         try:
             self.auth.jwt_refresh_token_required()
-        except Exception as e:
-            raise Exception(e.__class__.__name__)
+        except MissingTokenError:
+            return
         user_id = self.auth.get_jwt_subject().split(',')[0]
         user = (await session.execute(
             sql.user_type(int(user_id))
         )).scalars().first()
-
-        if not user:
-            raise Exception('User not found')
 
         assign_response(self.auth, *get_tokens(self.auth, user))
 

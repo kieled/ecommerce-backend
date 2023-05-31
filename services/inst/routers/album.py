@@ -1,18 +1,13 @@
 from typing import List
-from pydantic import BaseModel
 from fastapi import APIRouter, Depends, File, UploadFile, Form
-from dependencies import ClientStorage, get_clients
-from helpers import album_upload_post
+from inst.core import ClientStorage, get_clients, album_upload_post
+from inst.schemas import InstagramLink
 
 router = APIRouter(
     prefix="/album",
     tags=["album"],
     responses={404: {"description": "Not found"}},
 )
-
-
-class InstagramLink(BaseModel):
-    url: str
 
 
 @router.post("/upload", response_model=InstagramLink, description='Return instagram link to post')

@@ -9,15 +9,16 @@ from sqlalchemy.orm import load_only, joinedload
 from shared.localizations import telegram as localizations
 from shared.db import Order, CustomerAddress, Transaction, Requisites, Product, TransactionCurrencyEnum, Promo, \
     RequisiteTypes, TransactionStatusEnum, cls_session
-from api import schemas
-from api.utils import get_user_ids, AppService
+from api.domains.users.features.auth import get_user_ids
+from api.domains.mixin import AbstractBL
 from shared.schemas import MessageSchema
 from . import sql
-from api.config import rabbit_connection
+from api.broker import rabbit_connection
+from .types import UpdateOrderInput, CreateOrderInput
 
 
 @cls_session
-class OrderBL(AppService[Order]):
+class OrderBL(AbstractBL[Order]):
     def __init__(self, info, *args, **kwargs):
         super().__init__(Order, info, *args, **kwargs)
 
@@ -46,7 +47,7 @@ class OrderBL(AppService[Order]):
             raise Exception('Not found')
         return order
 
-    async def update(self, payload: schemas.UpdateOrderInput, session: AsyncSession = None):
+    async def update(self, payload: UpdateOrderInput, session: AsyncSession = None):
         update_dict = strawberry_to_dict(payload, exclude={'order_id'}, exclude_none=True)
         message = {
             'order_url': localizations.order_confirmed_message,
@@ -63,7 +64,7 @@ class OrderBL(AppService[Order]):
             session=session
         )
 
-    async def create(self, payload: schemas.CreateOrderInput, session: AsyncSession = None):
+    async def create(self, payload: CreateOrderInput, session: AsyncSession = None):
         temp_user_id, user_id = get_user_ids(self.info)
 
         if not temp_user_id and not user_id:

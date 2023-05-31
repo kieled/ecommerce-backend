@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from datetime import datetime
 
 from sqlalchemy import ForeignKey, func
@@ -14,7 +16,7 @@ class ProductImage(Base):
     path: Mapped[str]
     product_id: Mapped[int] = mapped_column(ForeignKey('products.id'))
 
-    product: Mapped['Product'] = relationship(
+    product: Mapped[Product] = relationship(
         back_populates='images',
         lazy=True
     )
@@ -28,7 +30,7 @@ class ProductSize(Base):
     name: Mapped[str | None]
     product_stock_id: Mapped[int] = mapped_column(ForeignKey('product_stock.id'))
 
-    product_stock: Mapped['ProductStock'] = relationship(
+    product_stock: Mapped[ProductStock] = relationship(
         lazy=True,
         back_populates='sizes'
     )
@@ -43,7 +45,7 @@ class ProductStock(Base):
     image: Mapped[str]
     product_id: Mapped[int] = mapped_column(ForeignKey('products.id'))
 
-    product: Mapped['Product'] = relationship(lazy=True, back_populates='stocks')
+    product: Mapped[Product] = relationship(lazy=True, back_populates='stocks')
     sizes: Mapped[list[ProductSize]] = relationship(
         lazy=True,
         back_populates='product_stock',
@@ -61,7 +63,7 @@ class ProductParam(Base):
 
     product_id: Mapped[int] = mapped_column(ForeignKey('products.id'))
 
-    product: Mapped['Product'] = relationship(
+    product: Mapped[Product] = relationship(
         lazy=True,
         back_populates='params'
     )

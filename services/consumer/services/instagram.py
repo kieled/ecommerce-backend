@@ -2,8 +2,8 @@ import os
 from dataclasses import dataclass
 import aiohttp
 from sqlalchemy import update
-from shared.db import Product, session
-from shared.localization.instagram import description
+from shared.db import Product, scoped_session
+from shared.localizations.instagram import description
 from shared.schemas import DescriptionSchema
 
 
@@ -26,7 +26,7 @@ class InstagramService:
             ) as resp:
                 json_data = await resp.json()
                 instagram_url = json_data['url']
-        async with session() as s:
+        async with scoped_session() as s:
             sql = update(Product).values(
                 inst_url=instagram_url,
             ).where(Product.id == self.data.get('id'))
@@ -58,6 +58,3 @@ class InstagramService:
             materials=self.data.get('params'),
             sizes=sizes
         ))
-
-
-__all__ = ['InstagramService']

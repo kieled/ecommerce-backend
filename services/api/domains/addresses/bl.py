@@ -2,13 +2,14 @@ from alchemy_graph import strawberry_to_dict
 from sqlalchemy.ext.asyncio import AsyncSession
 from strawberry.types import Info
 
-from api.schemas import CustomerAddressInput
-from api.utils import AppService, get_user_ids
+from .types import CustomerAddressInput
+from api.domains.mixin import AbstractBL
+from api.domains.users.features.auth import get_user_ids
 from shared.db import CustomerAddress, cls_session
 
 
 @cls_session
-class AddressBL(AppService[CustomerAddress]):
+class AddressBL(AbstractBL[CustomerAddress]):
     def __init__(self, info: Info):
         super().__init__(CustomerAddress, info)
 
