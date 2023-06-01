@@ -1,24 +1,6 @@
 import strawberry
 from .enums import product_status_enum
-
-
-@strawberry.type(name='Cart')
-class CartType:
-    product_id: int = 0
-    size_id: int | None = None
-    color_id: int | None = None
-    price: str = ''
-    size: str | None = None
-    image: str = ''
-    stock: str = ''
-    title: str = ''
-    count: int = 0
-
-
-@strawberry.type(name='CartItems')
-class CartItemsType:
-    items: list[CartType] = strawberry.field(default_factory=list)
-    sum: str = ''
+from api.domains.categories.types import ProductCategoryType, PublicCategoryType
 
 
 @strawberry.type(name='ProductImage')
@@ -67,13 +49,6 @@ class ProductListType:
     count: int = 0
 
 
-@strawberry.type(name='ProductCategory')
-class ProductCategoryType:
-    id: int = 0
-    slug: str = ''
-    name: str = ''
-
-
 @strawberry.type(name='ProductDetail')
 class ProductDetailType:
     id: int
@@ -100,12 +75,6 @@ class CreatedProductImageType:
 class CreatedProductType:
     id: int = 0
     images: list[CreatedProductImageType] = strawberry.field(default_factory=list)
-
-
-@strawberry.type(name='CurrentPrices')
-class CurrentPricesType:
-    usd: float = 0
-    rub: float = 0
 
 
 @strawberry.type(name='PublicParamItem')
@@ -145,12 +114,6 @@ class PublicItemType:
     images: list[PublicImageType] = strawberry.field(default_factory=list)
 
 
-@strawberry.type(name='PublicCategory')
-class PublicCategoryType:
-    id: int = 0
-    name: str = ''
-
-
 @strawberry.type(name='PublicDetail')
 class PublicDetailType:
     id: int
@@ -166,19 +129,15 @@ class PublicDetailType:
 
 @strawberry.type(name='PublicList')
 class PublicListType:
-    products: list[PublicItemType] = strawberry.field(default_factory=list)
-    count: int = ''
+    items: list[PublicItemType] = strawberry.field(default_factory=list)
+    count: int = 0
 
 
 __all__ = [
-    'CartType',
-    'CartItemsType',
-    'CurrentPricesType',
     'ProductParamType',
     'ProductStockType',
     'ProductItemType',
     'ProductSizeType',
-    'ProductCategoryType',
     'ProductDetailType',
     'CreatedProductType',
     'ProductListType',
@@ -191,5 +150,4 @@ __all__ = [
     'PublicParamItemType',
     'PublicStockItemType',
     'PublicImageType',
-    'PublicCategoryType',
 ]

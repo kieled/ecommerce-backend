@@ -1,10 +1,10 @@
 import strawberry
 
-from celery_app import migration_task
-from config import session, AuthJWT
-from schemas import UserType, TelegramUserInput, TelegramUserType
-from services import UserService
-from utils import IsAuthenticated, get_user_ids
+from api.broker import rabbit_connection
+from shared.schemas import MessageSchema
+from ..types import UserType, TelegramUserInput, TelegramUserType
+from ..bl import UsersBL
+from ..features.auth import IsAuthenticated, get_user_ids, AuthJWT
 
 
 @strawberry.type
@@ -14,8 +14,7 @@ class UserMutation:
     )
     async def login(self, username: str, password: str, info) -> UserType:
         """ Login """
-        async with session() as s:
-            data = await UserService(s, info).login(username, password)
+        data = await UsersBL(info).login(username, password)
         return UserType(**data)
 
     @strawberry.mutation(
@@ -37,19 +36,23 @@ class UserMutation:
     )
     async def refresh(self, info) -> None:
         """ Refresh token """
-        async with session() as s:
-            return await UserService(s, info).refresh()
+        return await UsersBL(info).refresh()
 
     @strawberry.mutation(
         description='Authorization for customers thought telegram widget'
     )
     async def telegram_login(self, payload: TelegramUserInput, info) -> TelegramUserType:
         """ Login through telegram widget """
-        async with session() as s:
-            data = await UserService(s, info).tg_login(payload)
+        data = await UsersBL(info).tg_login(payload)
         temp_user_id, user_id = get_user_ids(info)
         if temp_user_id:
-            migration_task.apply_async(args=[temp_user_id, data.get('id')])
+            await rabbit_connection.send_messages([MessageSchema(
+                action='users:migration',
+                body={
+                    'temp': temp_user_id,
+                    'user_id': data.get('id')
+                }
+            )])
             info.context['response'].delete_cookie('tempId')
         return TelegramUserType(
             username=data.get('username'),

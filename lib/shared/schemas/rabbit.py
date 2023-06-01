@@ -8,13 +8,13 @@ class MessageSchema(BaseModel):
     body: dict
 
     @validator('action')
-    def action_validator(cls, v):
+    def action_validator(self, v):
         if len(v.split(':')) != 2:
             raise ValueError('action is not valid')
         return v
 
     @validator('body', pre=True)
-    def body_prepare(cls, v):
+    def body_prepare(self, v):
         if not isinstance(v, dict):
             try:
                 return json.loads(v)

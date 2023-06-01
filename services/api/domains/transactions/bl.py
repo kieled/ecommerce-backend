@@ -8,7 +8,7 @@ from api.domains.mixin import AbstractBL
 
 
 @cls_session
-class TransactionsBL(AbstractBL[Transaction]):
+class TransactionBL(AbstractBL[Transaction]):
     def __init__(self, info, *args, **kwargs):
         super().__init__(Transaction, info, *args, **kwargs)
 
@@ -22,13 +22,13 @@ class TransactionsBL(AbstractBL[Transaction]):
             else Transaction.user_id == user_id
         )
 
-    async def get(self, transaction_id: int, session: AsyncSession) -> Transaction | None:
+    async def get(self, transaction_id: int, session: AsyncSession = None) -> Transaction | None:
         return await self.filter_one(session, self._filters(transaction_id))
 
-    async def detail(self, transaction_id: int, session: AsyncSession) -> Transaction | None:
+    async def detail(self, transaction_id: int, session: AsyncSession = None) -> Transaction | None:
         return await self.fetch_one(transaction_id, session)
 
-    async def list(self, status: transaction_status_enum, session: AsyncSession):
+    async def list(self, status: transaction_status_enum, session: AsyncSession = None):
         filters = (Transaction.status == TransactionStatusEnum(status.value),) if status else None
         return await self.list_items(session, 'items', filters)
 
@@ -59,7 +59,7 @@ class TransactionsBL(AbstractBL[Transaction]):
             latest_ids=[str(i) for i in latest_ids]
         )
 
-    async def public_list(self, session: AsyncSession):
+    async def public_list(self, session: AsyncSession = None):
         temp_user_id, user_id = get_user_ids(self.info)
         filters = (
             Transaction.temp_user_id == temp_user_id if temp_user_id else Transaction.user_id == user_id,

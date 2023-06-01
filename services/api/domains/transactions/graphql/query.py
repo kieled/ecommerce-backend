@@ -1,11 +1,11 @@
 import strawberry
+from alchemy_graph import orm_to_strawberry
 from sqlalchemy import select
-from config import session
-from models import Promo
-from schemas import OrderPublicListType, TransactionDetailPublicType, \
-    PromoResponseType, OrderPublicTransactionType
-from services import TransactionService
-from utils import orm_to_strawberry, IsAuthenticated
+from shared.db import Promo, scoped_session
+from ..types import TransactionDetailPublicType
+from ..bl import TransactionBL
+from api.domains.orders.types import OrderPublicListType, OrderPublicTransactionType, PromoResponseType
+from api.domains.users.features.auth import IsAuthenticated
 
 
 @strawberry.type
@@ -19,8 +19,7 @@ class TransactionQuery:
             info,
             page: int | None = 1
     ) -> OrderPublicListType:
-        async with session() as s:
-            data = await TransactionService(s, info, page).public_list()
+        data = await TransactionBL(info, page).public_list()
         return OrderPublicListType(
             items=[orm_to_strawberry(i, OrderPublicTransactionType) for i in data['items']],
             count=data['count']
@@ -33,10 +32,8 @@ class TransactionQuery:
     async def order_public_detail(
             self, order_id: int, info
     ) -> TransactionDetailPublicType:
-        async with session() as s:
-            data = await TransactionService(s, info).get(order_id)
-        data = orm_to_strawberry(data, TransactionDetailPublicType)
-        return data
+        data = await TransactionBL(info).get(order_id)
+        return orm_to_strawberry(data, TransactionDetailPublicType)
 
     @strawberry.field(
         description='Check promo code'
@@ -44,7 +41,7 @@ class TransactionQuery:
     async def check_promo(
             self, promo_code: str
     ) -> PromoResponseType:
-        async with session() as s:
+        async with scoped_session() as s:
             result = (await s.execute(
                 select(Promo).where(
                     Promo.code == promo_code,

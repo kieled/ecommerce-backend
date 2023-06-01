@@ -45,14 +45,14 @@ class AbstractBL(Generic[T]):
         return sql.order_by(desc(self.model.id))
 
     @staticmethod
-    async def _fetch_all(sql: Select, session: AsyncSession) -> Sequence[T]:
+    async def _fetch_all(sql: Select, session: AsyncSession = None) -> Sequence[T]:
         return (await session.execute(sql)).scalars().unique().all()
 
     @staticmethod
-    async def _fetch_first(sql: Select, session: AsyncSession) -> T:
+    async def _fetch_first(sql: Select, session: AsyncSession = None) -> T:
         return (await session.execute(sql)).scalars().unique().first()
 
-    async def fetch_one(self, obj_id: int, session: AsyncSession) -> T:
+    async def fetch_one(self, obj_id: int, session: AsyncSession = None) -> T:
         return await self._fetch_first(
             self.sql().where(self.model.id == obj_id),
             session
@@ -101,19 +101,19 @@ class AbstractBL(Generic[T]):
             sql = sql.where(*filters)
         return await self._fetch_first(sql, session)
 
-    async def delete_item(self, obj_id: int, session: AsyncSession) -> None:
+    async def delete_item(self, obj_id: int, session: AsyncSession = None) -> None:
         await session.execute(
             delete(self.model).where(self.model.id == obj_id)
         )
         await session.commit()
 
-    async def update_item(self, obj_id: int, values: dict, session: AsyncSession) -> None:
+    async def update_item(self, obj_id: int, values: dict, session: AsyncSession = None) -> None:
         await session.execute(
             update(self.model).where(self.model.id == obj_id).values(**values)
         )
         await session.commit()
 
-    async def create_item(self, payload: dict, session: AsyncSession) -> T:
+    async def create_item(self, payload: dict, session: AsyncSession = None) -> T:
         item_id = (await session.execute(
             insert(self.model).values(**payload).returning(self.model.id)
         )).scalars().first()

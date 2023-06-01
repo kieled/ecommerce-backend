@@ -1,13 +1,17 @@
+import asyncio
 import io
 import os
 import zipfile
 from io import BytesIO
+
+import aiohttp
 import requests
 from math import floor
 from PIL import Image
 
 from .types import ProductCreateImageInput
-from shared.db import ImageCropDirectionEnum
+from shared.db import ImageCropDirectionEnum, ProductImage, ProductStock, ProductSize
+from ...types import ProductCreateInput
 
 
 def crop_image(image: Image, side: ImageCropDirectionEnum, percent: int) -> Image:
@@ -111,8 +115,36 @@ def get_local_images(product_id: int):
     return zip_buffer.getvalue()
 
 
+async def prepare_images(product_id: int, s: aiohttp.ClientSession, payload: ProductCreateInput):
+    product_images = await asyncio.gather(*[handle_image(
+        product_id,
+        value,
+        session=s,
+        folder='default',
+        filename=str(index + 1)
+    ) for index, value in enumerate(payload.images)])
+    stock_images = await asyncio.gather(*[
+        handle_image(
+            product_id,
+            stock.image,
+            session=s,
+            folder='colors',
+            filename=str(index + 1)
+        ) for index, stock in enumerate(payload.stocks)
+    ])
+    return (
+        [ProductImage(path=p, product_id=product_id) for p in product_images],
+        [ProductStock(name=stock.name if stock.name else None, color=stock.color,
+                      image=stock_images[index], product_id=product_id,
+                      sizes=[ProductSize(size=size.size, name=size.name) for size in stock.sizes]
+                      ) for index, stock in enumerate(payload.stocks)
+         ]
+    )
+
+
 __all__ = [
     'handle_image',
     'get_local_images',
     'download_images',
+    'prepare_images'
 ]

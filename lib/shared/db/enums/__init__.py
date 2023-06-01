@@ -1,35 +1,35 @@
-import enum
+from enum import Enum, auto, IntEnum
 
 
-class ImageCropDirectionEnum(enum.Enum):
-    top = 'top'
-    bottom = 'bottom'
+class ImageCropDirectionEnum(Enum):
+    top = auto()
+    bottom = auto()
 
 
-class ProductStatusEnum(enum.IntEnum):
+class ProductStatusEnum(IntEnum):
     created = 1
     published = 2
     archive = 3
 
 
-class CurrencyEnum(enum.Enum):
-    usd = 'usd'
-    rub = 'rub'
+class CurrencyEnum(Enum):
+    usd = auto()
+    rub = auto()
 
 
-class TransactionStatusEnum(enum.Enum):
-    created = 'created'
-    confirmed = 'confirmed'
-    complete = 'complete'
-    canceled = 'canceled'
+class TransactionStatusEnum(Enum):
+    created = auto()
+    confirmed = auto()
+    complete = auto()
+    canceled = auto()
 
 
-class TransactionCurrencyEnum(enum.IntEnum):
+class TransactionCurrencyEnum(IntEnum):
     byn = 1
     rub = 2
     usd = 3
 
 
-class UserTypeEnum(enum.IntEnum):
+class UserTypeEnum(IntEnum):
     user = 1
     admin = 2
