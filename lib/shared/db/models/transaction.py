@@ -3,7 +3,7 @@ from __future__ import annotations
 from datetime import datetime
 
 from ..config import Base
-from ..enums import TransactionCurrencyEnum, TransactionStatusEnum
+from ..enums import TransactionStatusEnum
 from sqlalchemy import ForeignKey, func
 from sqlalchemy.orm import mapped_column, Mapped, relationship
 
@@ -16,7 +16,6 @@ class Transaction(Base):
 
     id: Mapped[int] = mapped_column(primary_key=True)
     status: Mapped[TransactionStatusEnum] = mapped_column(default=TransactionStatusEnum.created)
-    currency: Mapped[TransactionCurrencyEnum] = mapped_column(default=TransactionCurrencyEnum.usd)
     promo_id: Mapped[int | None] = mapped_column(ForeignKey('promo_codes.id'))
     amount: Mapped[int]
     user_id: Mapped[int | None] = mapped_column(ForeignKey('users.id'))
@@ -58,7 +57,6 @@ class RequisiteTypes(Base):
 
     name: Mapped[str]
     detail: Mapped[str]
-    currency: Mapped[TransactionCurrencyEnum | None]
 
 
 class Requisites(Base):

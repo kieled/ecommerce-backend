@@ -1,10 +1,10 @@
 from datetime import datetime
 from typing import Iterable
 
-from sqlalchemy import select, update
+from sqlalchemy import select, update, insert
 from sqlalchemy.orm import load_only, joinedload
 
-from shared.db import Transaction, Requisites, RequisiteTypes, TransactionStatusEnum
+from shared.db import Transaction, Requisites, RequisiteTypes, TransactionStatusEnum, Promo
 
 
 def get_current(transaction_id: int):
@@ -29,9 +29,25 @@ def latest_ids(from_date: datetime):
 
 
 def mark_success(filters: Iterable):
-    update(Transaction).where(
+    return update(Transaction).where(
         *filters,
         Transaction.status == TransactionStatusEnum.created
     ).values(
         status=TransactionStatusEnum.confirmed
     )
+
+
+def create(
+        amount: int,
+        requisite_id: int,
+        promo: int | None,
+        user_id: int | None,
+        temp_user_id: str | None
+):
+    return insert(Transaction).values(
+        amount=amount,
+        promo_id=promo,
+        user_id=user_id,
+        temp_user_id=temp_user_id,
+        requisite_id=requisite_id
+    ).returning(Transaction.id)

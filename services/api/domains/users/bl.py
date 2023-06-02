@@ -1,7 +1,6 @@
 from alchemy_graph import strawberry_to_dict
 from fastapi_jwt_auth.exceptions import MissingTokenError
 from sqlalchemy.ext.asyncio import AsyncSession
-from strawberry.types import Info
 from .types import TelegramUserInput
 from shared.base import telegram_config
 from . import sql
@@ -12,8 +11,6 @@ from api.domains.mixin import AbstractBL
 
 @cls_session
 class UsersBL(AbstractBL[User]):
-    def __init__(self, info: Info, *args, **kwargs):
-        super().__init__(User, info, *args, **kwargs)
 
     async def get(self, user_id: int, session: AsyncSession = None) -> User:
         return await self.fetch_one(user_id, session)

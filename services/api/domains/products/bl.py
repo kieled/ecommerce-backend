@@ -1,9 +1,8 @@
 import aiohttp
 from alchemy_graph import strawberry_to_dict
 from sqlalchemy.ext.asyncio import AsyncSession
-from strawberry.types import Info
-
 from shared.db import Product, ProductParam, cls_session
+from .features.cart import CartProductInput
 from .features.images import prepare_images
 from .types import ProductCreateInput, ProductUpdateInput
 from api.domains.mixin import AbstractBL
@@ -12,8 +11,6 @@ from . import sql
 
 @cls_session
 class ProductBL(AbstractBL[Product]):
-    def __init__(self, info: Info, *args, **kwargs):
-        super().__init__(Product, info, *args, **kwargs)
 
     async def items(
             self,
@@ -76,3 +73,19 @@ class ProductBL(AbstractBL[Product]):
 
     async def public_detail(self, product_id: int, session: AsyncSession = None):
         return await self.fetch_one(product_id, session)
+
+    async def calc_prices(self, items: list[CartProductInput], session: AsyncSession = None) -> int:
+        product_prices = await self._fetch_all(sql.only_prices(items), session)
+
+        amount = 0
+
+        for i in product_prices:
+            count = next((p.count for p in items if p.product_id == i.id), None)
+            if count is None:
+                continue
+            amount += i.price * count
+
+        if amount == 0:
+            raise Exception('Bad request')
+
+        return amount

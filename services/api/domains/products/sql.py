@@ -1,6 +1,7 @@
 from sqlalchemy import select, Select
 from sqlalchemy.orm import load_only, joinedload
 
+from api.domains.products.features.cart import CartProductInput
 from shared.db import Product, ProductParam, ProductImage, ProductCategory, ProductStock, ProductSize
 
 
@@ -35,3 +36,11 @@ def detail(product_id: int) -> Select:
             ProductSize.name
         )
     ).where(Product.id == product_id)
+
+
+def only_prices(products: list[CartProductInput]):
+    return select(Product).options(
+        load_only(Product.price)
+    ).where(
+        Product.id.in_([p.product_id for p in products])
+    )

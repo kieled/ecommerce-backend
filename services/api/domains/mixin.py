@@ -27,14 +27,16 @@ def get_selected_sql(model: T, info: Info) -> Optional[Callable[..., Select]]:
 class AbstractBL(Generic[T]):
     def __init__(
             self,
-            model: type[T],
             info: Info,
             page: int = 1,
             page_size: int = 15
     ):
         self.info = info
-        self.sql = get_selected_sql(model, info)
-        self.model: T = model
+        try:
+            self.sql = get_selected_sql(T, info)
+        except Exception:
+            self.sql = None
+        self.model = T
         self.page_size = page_size
         self.offset = (page - 1) * self.page_size
 
@@ -45,14 +47,14 @@ class AbstractBL(Generic[T]):
         return sql.order_by(desc(self.model.id))
 
     @staticmethod
-    async def _fetch_all(sql: Select, session: AsyncSession = None) -> Sequence[T]:
+    async def _fetch_all(sql: Select, session: AsyncSession) -> Sequence[any]:
         return (await session.execute(sql)).scalars().unique().all()
 
     @staticmethod
-    async def _fetch_first(sql: Select, session: AsyncSession = None) -> T:
+    async def _fetch_first(sql: Select, session: AsyncSession) -> any:
         return (await session.execute(sql)).scalars().unique().first()
 
-    async def fetch_one(self, obj_id: int, session: AsyncSession = None) -> T:
+    async def fetch_one(self, obj_id: int, session: AsyncSession) -> T:
         return await self._fetch_first(
             self.sql().where(self.model.id == obj_id),
             session
@@ -101,23 +103,25 @@ class AbstractBL(Generic[T]):
             sql = sql.where(*filters)
         return await self._fetch_first(sql, session)
 
-    async def delete_item(self, obj_id: int, session: AsyncSession = None) -> None:
+    async def delete_item(self, obj_id: int, session: AsyncSession) -> None:
         await session.execute(
             delete(self.model).where(self.model.id == obj_id)
         )
         await session.commit()
 
-    async def update_item(self, obj_id: int, values: dict, session: AsyncSession = None) -> None:
+    async def update_item(self, obj_id: int, values: dict, session: AsyncSession) -> None:
         await session.execute(
             update(self.model).where(self.model.id == obj_id).values(**values)
         )
         await session.commit()
 
-    async def create_item(self, payload: dict, session: AsyncSession = None) -> T:
+    async def create_item(self, payload: dict | list[dict], session: AsyncSession) -> T | None:
         item_id = (await session.execute(
-            insert(self.model).values(**payload).returning(self.model.id)
+            insert(self.model).values(payload).returning(self.model.id)
         )).scalars().first()
         await session.commit()
+        if not item_id:
+            return None
         return self.model(
             id=item_id,
             **payload

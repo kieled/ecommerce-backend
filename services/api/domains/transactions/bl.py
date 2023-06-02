@@ -1,6 +1,7 @@
+import math
 from datetime import datetime, timedelta
 from sqlalchemy.ext.asyncio import AsyncSession
-from shared.db import Transaction, TransactionStatusEnum, cls_session
+from shared.db import Transaction, TransactionStatusEnum, cls_session, Promo
 from .types import transaction_status_enum
 from . import sql
 from api.domains.users.features.auth import get_user_ids
@@ -9,8 +10,6 @@ from api.domains.mixin import AbstractBL
 
 @cls_session
 class TransactionBL(AbstractBL[Transaction]):
-    def __init__(self, info, *args, **kwargs):
-        super().__init__(Transaction, info, *args, **kwargs)
 
     def _filters(self, transaction_id: int) -> tuple:
         temp_user_id, user_id = get_user_ids(self.info)
@@ -65,3 +64,28 @@ class TransactionBL(AbstractBL[Transaction]):
             Transaction.temp_user_id == temp_user_id if temp_user_id else Transaction.user_id == user_id,
         )
         return await self.list_items(session, filters=filters)
+
+    async def create(
+            self,
+            amount: int,
+            requisite_id: int,
+            promo: Promo | None,
+            session: AsyncSession = None
+    ) -> int:
+        temp_user_id, user_id = get_user_ids(self.info)
+
+        if promo:
+            amount = math.ceil(amount - amount * promo.discount)
+
+        transaction = await self.create_item(dict(
+            amount=amount,
+            promo_id=promo,
+            user_id=user_id,
+            temp_user_id=temp_user_id,
+            requisite_id=requisite_id
+        ), session)
+
+        if not transaction:
+            raise Exception("Transaction couldn't be created")
+
+        return transaction.id

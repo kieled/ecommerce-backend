@@ -7,9 +7,7 @@ from api.domains.mixin import AbstractBL
 
 
 @cls_session
-class RequisiteTypesBL(AbstractBL[RequisiteTypes]):
-    def __init__(self, *args, **kwargs):
-        super().__init__(RequisiteTypes, *args, **kwargs)
+class RequisiteTypeBL(AbstractBL[RequisiteTypes]):
 
     async def list(self, session: AsyncSession = None):
         return await self.fetch_all(session)

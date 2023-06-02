@@ -1,10 +1,16 @@
-from datetime import datetime
 import strawberry
-from starlette.responses import Response
 from strawberry.types import Info
-from ..types import UpdateOrderInput, CreateOrderInput, CreatedOrderIdType
+
+from ..types import UpdateOrderInput, CreatedOrderIdType
 from ..bl import OrderBL
-from api.domains.users.features.auth import IsAdmin
+
+from api.domains.users.features.auth import IsAdmin, add_random_temp_id_for_response
+from api.domains.addresses import AddressBL
+from api.domains.products.features.cart import CartInput
+from api.domains.requisite import RequisiteBL
+from api.domains.transactions.features.promo import PromoBL
+from api.domains.transactions import TransactionBL
+from api.domains.products import ProductBL
 
 
 @strawberry.type
@@ -26,18 +32,20 @@ class OrderMutations:
     )
     async def create_order(
             self,
-            payload: CreateOrderInput,
+            payload: CartInput,
             info: Info
     ) -> CreatedOrderIdType:
         """ Create order from cart """
-        data = await OrderBL(info).create(payload)
-        if data['temp_id'] and not data['user_id']:
-            now = datetime.now()
-            expires = int((datetime(
-                day=now.day,
-                month=now.month,
-                year=now.year + 1
-            )).timestamp())
-            response: Response = info.context['response']
-            response.set_cookie('tempId', data['temp_id'], expires=expires)
+        temp_user_id = add_random_temp_id_for_response(self.info)
+        payload.address_id = await AddressBL(info).get_or_create(payload, temp_user_id)
+        promo = None
+        if payload.promo:
+            promo = await PromoBL(info).find(payload.promo)
+        requisite = await RequisiteBL(info).get_active(payload.payment_type)
+        if not requisite:
+            raise Exception('No requisites are available')
+        amount = await ProductBL(info).calc_prices(payload.products)
+        transaction_id = await TransactionBL(info).create(amount, requisite.id, promo)
+        data = await OrderBL(info).create(payload, transaction_id)
+
         return CreatedOrderIdType(id=data['id'])

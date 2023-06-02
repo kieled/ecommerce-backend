@@ -1,1 +1,1 @@
-from .bl import RequisiteTypesBL
+from .bl import RequisiteTypeBL

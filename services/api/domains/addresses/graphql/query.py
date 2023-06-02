@@ -1,9 +1,7 @@
 import strawberry
 from alchemy_graph import orm_to_strawberry
-from config import session
-from parsers import prices_manager
-from ..types import CustomerAddressType, CreateOrderProductInput, CustomerCardListType, CustomerCardType
-from utils import IsAuthenticated
+from ..types import CustomerAddressType
+from api.domains.users.features.auth import IsAuthenticated
 from ..bl import AddressBL
 
 

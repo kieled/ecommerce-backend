@@ -7,19 +7,22 @@ from . import sql
 
 
 @cls_session
-class RequisitesBL(AbstractBL[Requisites]):
-    def __init__(self, *args, **kwargs):
-        super().__init__(Requisites, *args, **kwargs)
-
+class RequisiteBL(AbstractBL[Requisites]):
     async def list(self, type_id: int, session: AsyncSession = None):
         filters = (Requisites.type_id == type_id,)
         return await self.fetch_all(session, filters=filters)
 
-    async def get_active(self, type_id: int, session: AsyncSession = None):
+    async def get_active(
+            self,
+            type_id: int,
+            session: AsyncSession = None
+    ) -> Requisites | None:
         filters = (
             Requisites.type_id == type_id,
             Requisites.is_active == True
         )
+        if not self.sql:
+            return await self._fetch_first(sql.active_id(type_id), session)
         return await self.filter_one(session, filters)
 
     async def update(self, payload: RequisitesItemInput, session: AsyncSession = None) -> None:

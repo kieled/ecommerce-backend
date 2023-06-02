@@ -24,12 +24,6 @@ class TransactionStatusEnum(Enum):
     canceled = auto()
 
 
-class TransactionCurrencyEnum(IntEnum):
-    byn = 1
-    rub = 2
-    usd = 3
-
-
 class UserTypeEnum(IntEnum):
     user = 1
     admin = 2

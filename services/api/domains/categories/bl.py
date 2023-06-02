@@ -8,9 +8,7 @@ from api.domains.mixin import AbstractBL
 
 @cls_session
 class ProductCategoryBL(AbstractBL[ProductCategory]):
-    def __init__(self, info, *args):
-        super().__init__(ProductCategory, info, *args)
-
+    
     async def list(self, session: AsyncSession = None):
         return await self.fetch_all(session)
 
