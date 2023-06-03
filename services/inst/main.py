@@ -1,6 +1,7 @@
 from fastapi import FastAPI, Request
-from starlette.responses import JSONResponse
-from routers import auth_router, media_router, album_router
+from fastapi.responses import JSONResponse
+
+from inst.routers import auth_router, media_router, album_router
 
 app = FastAPI(redoc_url=None, docs_url=None, openapi_url=None, title='Instagram Service')
 app.include_router(auth_router)

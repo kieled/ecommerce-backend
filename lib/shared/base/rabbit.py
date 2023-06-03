@@ -2,10 +2,10 @@ from pydantic import BaseSettings
 
 
 class RabbitConfig(BaseSettings):
-    RABBITMQ_DEFAULT_USER: str
-    RABBITMQ_DEFAULT_PASS: str
-    RABBITMQ_HOST: str
-    RABBITMQ_PORT: int
+    RABBITMQ_DEFAULT_USER: str = 'admin'
+    RABBITMQ_DEFAULT_PASS: str = 'admin'
+    RABBITMQ_HOST: str = 'rabbit'
+    RABBITMQ_PORT: int = 5672
 
     @property
     def url(self):

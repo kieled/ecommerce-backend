@@ -1,0 +1,16 @@
+aio-pika==9.1.2
+aiofiles==23.1.0
+aiohttp[speedups]==3.8.4
+alchemy-graph==0.1.2
+alembic==1.11.1
+asyncpg==0.27.0
+fastapi-jwt-auth==0.5.0
+fastapi==0.95.2
+hypercorn==0.14.3
+passlib==1.7.4
+pillow==9.5.0
+pydantic==1.10.7
+python-multipart==0.0.6
+sqlalchemy==2.0.15
+strawberry-graphql[fastapi]==0.178.3
+types-aiofiles==23.1.0.3

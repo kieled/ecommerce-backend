@@ -1,7 +1,7 @@
 import functools
 from asyncio import current_task
 from contextlib import asynccontextmanager
-from typing import TypeVar, Callable, AsyncGenerator
+from typing import TypeVar, Callable
 import inspect
 from sqlalchemy.ext.asyncio import async_scoped_session, AsyncSession, async_sessionmaker, create_async_engine
 
@@ -14,7 +14,7 @@ _session = async_sessionmaker(
 
 
 @asynccontextmanager
-async def scoped_session() -> AsyncGenerator[AsyncSession, any, None]:
+async def scoped_session():
     scoped_factory = async_scoped_session(
         _session,
         scopefunc=current_task,

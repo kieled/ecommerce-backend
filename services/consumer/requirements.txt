@@ -1,0 +1,11 @@
+aio-pika==9.1.2
+aiohttp[speedups]==3.8.4
+asyncpg==0.27.0
+instagrapi==1.17.10
+pydantic==1.10.7
+pyrogram==2.0.106
+python-multipart==0.0.6
+sqlalchemy==2.0.15
+strawberry-graphql[fastapi]==0.178.3
+tgcrypto==1.2.5
+tinydb==4.7.1

@@ -1,5 +1,5 @@
 from fastapi import FastAPI, Form, HTTPException, status
-from services import yandex_service
+from payment.services import yandex_service
 
 app = FastAPI(redoc_url=None, docs_url=None, openapi_url=None, title='Payment Service')
 

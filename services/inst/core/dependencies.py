@@ -1,11 +1,8 @@
 from typing import Generator
 
-from storages import ClientStorage
+from .storages import client_storage
 
 
 def get_clients() -> Generator:
-    clients = ClientStorage()
-    try:
-        yield clients
-    finally:
-        clients.close()
+    with client_storage as c:
+        yield c

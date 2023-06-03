@@ -4,7 +4,7 @@ from typing import Iterable
 from sqlalchemy import select, update, insert
 from sqlalchemy.orm import load_only, joinedload
 
-from shared.db import Transaction, Requisites, RequisiteTypes, TransactionStatusEnum, Promo
+from shared.db import Transaction, Requisites, RequisiteTypes, TransactionStatusEnum
 
 
 def get_current(transaction_id: int):

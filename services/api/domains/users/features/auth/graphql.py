@@ -1,5 +1,5 @@
 from fastapi_jwt_auth.exceptions import AuthJWTException
-from api.config import AuthJWT
+from .config import AuthJWT
 from fastapi import Depends
 
 

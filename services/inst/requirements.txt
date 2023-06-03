@@ -1,6 +1,6 @@
 fastapi==0.92.0
 uvicorn==0.20.0
-instagrapi>=1.16.41
+instagrapi>=1.17.1
 python-multipart==0.0.5
 Pillow==9.4.0
 ipdb==0.13.11

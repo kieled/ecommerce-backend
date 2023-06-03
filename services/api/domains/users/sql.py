@@ -16,3 +16,7 @@ def add_new(payload: dict):
 
 def user_type(user_id: int):
     return select(User).options(load_only(User.id, User.type)).where(User.id == user_id)
+
+
+def user_by_telegram(telegram_chat_id: str):
+    return select(User).options(load_only(User.id, User.type)).where(User.telegram_chat_id == telegram_chat_id)

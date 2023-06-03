@@ -1,8 +1,7 @@
 import json
-import logging
-from typing import Optional, Dict
-from fastapi import APIRouter, Depends, Form
-from inst.core import ClientStorage, get_clients
+from typing import Optional
+from fastapi import APIRouter, Form
+from inst.core import client_storage
 
 router = APIRouter(
     prefix="/auth",
@@ -17,52 +16,45 @@ async def auth_login(
         password: str = Form(...),
         verification_code: Optional[str] = Form(""),
         locale: Optional[str] = Form(""),
-        clients: ClientStorage = Depends(get_clients)
 ) -> str:
-    cl = clients.client()
+    with client_storage as cl:
+        if locale != "":
+            cl.set_locale(locale)
 
-    if locale != "":
-        cl.set_locale(locale)
-
-    result = cl.login(
-        username,
-        password,
-        verification_code=verification_code
-    )
-    if result:
-        clients.set(cl)
-        return cl.sessionid
+        result = cl.login(
+            username,
+            password,
+            verification_code=verification_code
+        )
+        if result:
+            client_storage.set(cl)
+            return cl.sessionid
     return result
 
 
 @router.post("/relogin")
-async def auth_relogin(
-        clients: ClientStorage = Depends(get_clients)
-) -> bool:
-    cl = clients.get()
-    result = cl.relogin()
-    return result
+async def auth_relogin() -> bool:
+    with client_storage as cl:
+        return cl.relogin()
 
 
 @router.get("/settings/get")
-async def settings_get(
-        clients: ClientStorage = Depends(get_clients)
-) -> Dict:
-    cl = clients.get()
-    return cl.get_settings()
+async def settings_get() -> dict:
+    with client_storage as cl:
+        return cl.get_settings()
 
 
 @router.post("/settings/set")
 async def settings_set(
         settings: str = Form(...),
-        clients: ClientStorage = Depends(get_clients)
-) -> str:
+) -> dict[str, str]:
     try:
-        cl = clients.get()
-    except Exception as e:
-        logging.info(e.__class__.__name__)
-        cl = clients.client()
-    cl.set_settings(json.loads(settings))
-    cl.expose()
-    clients.set(cl)
-    return cl.sessionid
+        data = json.loads(settings)
+    except json.JSONDecodeError:
+        return {'error': 'Invalid / unparsable format'}
+    client_storage.set()
+    with client_storage as cl:
+        cl.set_settings(data)
+        cl.expose()
+        client_storage.set(cl.get_settings())
+        return cl.sessionid

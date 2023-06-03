@@ -58,10 +58,11 @@ class UsersBL(AbstractBL[User]):
             await session.execute(sql.update_first_name(new_data['first_name'], payload.id))
             await session.commit()
         else:
-            user_id = (await session.execute(sql.add_new(new_data))).scalars().first()
+            telegram_chat_id = (await session.execute(sql.add_new(new_data))).scalars().first()
             await session.commit()
-            # TODO: it is probably not working because request get without info selected fields
-            user = await self.by_telegram(user_id, session)
+            user = await self._fetch_first(
+                sql.user_by_telegram(telegram_chat_id), session
+            )
 
         access, refresh = get_tokens(self.auth, user)
         assign_response(self.auth, access, refresh)

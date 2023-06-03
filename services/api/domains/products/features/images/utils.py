@@ -5,13 +5,12 @@ import zipfile
 from io import BytesIO
 
 import aiohttp
-import requests
 from math import floor
 from PIL import Image
 
 from .types import ProductCreateImageInput
 from shared.db import ImageCropDirectionEnum, ProductImage, ProductStock, ProductSize
-from ...types import ProductCreateInput
+from api.domains.products.types import ProductCreateInput
 
 
 def crop_image(image: Image, side: ImageCropDirectionEnum, percent: int) -> Image:
@@ -60,7 +59,7 @@ def get_image_path(product_id: int, folder: str, name: str):
 async def handle_image(
         product_id: int,
         input_img: ProductCreateImageInput,
-        session,
+        session: aiohttp.ClientSession,
         folder: str = 'default',
         filename: str | None = None,
 ) -> str:
@@ -81,16 +80,23 @@ async def handle_image(
     return result
 
 
-def download_images(
+async def download_image(index: int, image: str, session: aiohttp.ClientSession) -> tuple[int, bytes]:
+    async with session.get(image) as img:
+        return index, BytesIO(await img.read()).getvalue()
+
+
+async def download_images(
         images: list[str]
 ):
     zip_buffer = io.BytesIO()
     with zipfile.ZipFile(zip_buffer, 'a', zipfile.ZIP_DEFLATED, False) as file:
-        with requests.Session() as s:
-            for i, image in enumerate(images):
-                img = s.get(image)
-                img_file = BytesIO(img.content)
-                file.writestr(f'{i}.jpg', img_file.getvalue())
+        async with aiohttp.ClientSession() as s:
+            result = await asyncio.gather(*[
+                download_image(i, image, s)
+                for i, image in enumerate(images)
+            ])
+            for i, image in result:
+                file.writestr(f'{i}.jpg', image)
     zip_buffer.seek(0)
     return zip_buffer
 

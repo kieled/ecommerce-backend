@@ -1,5 +1,4 @@
 import strawberry
-from api.domains.addresses.types import CustomerAddressInput
 
 
 @strawberry.input

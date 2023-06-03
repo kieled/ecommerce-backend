@@ -3,7 +3,7 @@ from strawberry.types import Info
 
 from api.broker import rabbit_connection
 from shared.schemas import MessageSchema
-from ..bl import TransactionsBL
+from ..bl import TransactionBL
 from api.domains.users.features.auth import IsAuthenticated
 
 
@@ -19,7 +19,7 @@ class TransactionMutations:
             info: Info
     ) -> None:
         """ Confirm payment public order """
-        data = await TransactionsBL(info).confirm(order_id)
+        data = await TransactionBL(info).confirm(order_id)
         await rabbit_connection.send_messages(MessageSchema(
             action='payment:check',
             body=data

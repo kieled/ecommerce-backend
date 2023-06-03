@@ -1,6 +1,6 @@
 import os
 from importlib import import_module
-from typing import Callable, Optional
+from typing import Callable, Optional, get_type_hints
 
 
 class Router:
@@ -23,7 +23,19 @@ class Router:
         if self._exists(module, method):
             return self._routes.get(module).get(method)
 
+    @staticmethod
+    def check_args(func: Callable, data: dict) -> bool:
+        for arg, arg_type in get_type_hints(func).items():
+            if arg not in data:
+                return False
+            if not isinstance(data[arg], arg_type):
+                return False
+        return True
+
     def _exists(self, module: str, method: str):
         if hasattr(self._routes, module) and hasattr(self._routes.get(module), method):
             return True
         return False
+
+
+router = Router()

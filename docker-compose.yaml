@@ -15,12 +15,33 @@ services:
       context: ./services/api
       dockerfile: ../../docker/api.Dockerfile
     depends_on:
-      - db
+      db:
+        condition: service_started
+      rabbit:
+        condition: service_healthy
     env_file:
       - .env
     volumes:
       - ./services/api:/api
       - ./lib/shared:/api/shared
+      - ./assets:/assets
+
+  consumer:
+    expose:
+      - 8000
+    build:
+      context: ./services/api
+      dockerfile: ../../docker/api.Dockerfile
+    depends_on:
+      rabbit:
+        condition: service_healthy
+      db:
+        condition: service_started
+    env_file:
+      - .env
+    volumes:
+      - ./services/consumer:/consumer
+      - ./lib/shared:/consumer/shared
       - ./assets:/assets
 
   instagram:
@@ -54,7 +75,11 @@ services:
     volumes:
       - ./rabbitmq/delayed_message_exchange.ez:/opt/rabbitmq/plugins/delayed_message.ez
       - ./rabbitmq/enabled:/etc/rabbitmq/enabled_plugins
-
+    healthcheck:
+      test: [ "CMD", "rabbitmqctl", "status" ]
+      interval: 10s
+      timeout: 10s
+      retries: 5
 
 volumes:
   postgres_data:

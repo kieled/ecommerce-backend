@@ -1,4 +1,4 @@
-from api.config import AuthJWT
+from .config import AuthJWT
 from fastapi_jwt_auth.exceptions import AuthJWTException
 from strawberry import BasePermission
 from strawberry.types import Info
