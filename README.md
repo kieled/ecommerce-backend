@@ -39,11 +39,9 @@ This will start the server on: __http://localhost:8000__
 1. FastAPI docs available on: __http://localhost:8000/docs__
 2. GraphQL User Interface on: __http://localhost:8000/graphql__
 
-## :diamond_shape_with_a_dot_inside: API Endpoints
+## :diamond_shape_with_a_dot_inside: HTTP Endpoints
 
 The following API endpoints are available:
-
-### HTTP Routes
 
 #### Authentication
 
@@ -63,6 +61,8 @@ The following API endpoints are available:
   parameter. _[AdminOnly]_
 - __`POST /upload-files/`__ - Endpoint for uploading temporary images. Requires the files field as a form data list of
   files to be uploaded. _[AdminOnly]_
+
+## :large_blue_circle: GraphQL Endpoints
 
 ### GraphQL Queries
 
