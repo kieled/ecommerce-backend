@@ -3,8 +3,6 @@ import string
 from datetime import datetime
 
 from passlib.context import CryptContext
-import hashlib
-import hmac
 
 from fastapi import Response
 
@@ -19,21 +17,6 @@ def hash_password(password: str) -> str:
 
 def verify_password(password: str, hashed_password: str) -> bool:
     return pwd_context.verify(password, hashed_password)
-
-
-def verify_telegram_auth(data: dict, bot_token: str) -> bool:
-    check_hash = data.pop('hash')
-    check_list = ['{}={}'.format(k, v) for k, v in data.items()]
-    check_string = '\n'.join(sorted(check_list))
-
-    secret_key = hashlib.sha256(str.encode(bot_token)).digest()
-    hmac_hash = hmac.new(
-        secret_key,
-        str.encode(check_string),
-        hashlib.sha256,
-    ).hexdigest()
-
-    return hmac_hash == check_hash
 
 
 def get_user_ids(info: Info) -> tuple[str | None, int | None]:
@@ -61,7 +44,6 @@ def add_random_temp_id_for_response(info: Info) -> str | None:
 __all__ = [
     'hash_password',
     'verify_password',
-    'verify_telegram_auth',
     'get_user_ids',
     'add_random_temp_id_for_response'
 ]

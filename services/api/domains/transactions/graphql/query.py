@@ -5,7 +5,7 @@ from shared.db import Promo, scoped_session
 from ..types import TransactionDetailPublicType
 from ..bl import TransactionBL
 from api.domains.orders.types import OrderPublicListType, OrderPublicTransactionType, PromoResponseType
-from api.domains.users.features.auth import IsAuthenticated
+from api.utils.graphql import IsAuthenticated
 
 
 @strawberry.type

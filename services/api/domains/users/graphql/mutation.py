@@ -4,7 +4,8 @@ from api.broker import rabbit_connection
 from shared.schemas import MessageSchema
 from ..types import UserType, TelegramUserInput, TelegramUserType
 from ..bl import UsersBL
-from ..features.auth import IsAuthenticated, get_user_ids, AuthJWT
+from api.utils.graphql import IsAuthenticated, get_user_ids
+from ..features.auth import AuthJWT
 
 
 @strawberry.type

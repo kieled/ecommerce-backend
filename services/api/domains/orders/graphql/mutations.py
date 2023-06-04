@@ -4,13 +4,13 @@ from strawberry.types import Info
 from ..types import UpdateOrderInput, CreatedOrderIdType
 from ..bl import OrderBL
 
-from api.domains.users.features.auth import IsAdmin, add_random_temp_id_for_response
+from api.utils.graphql import IsAdmin, add_random_temp_id_for_response
 from api.domains.addresses import AddressBL
-from api.domains.products.features.cart import CartInput
 from api.domains.requisite import RequisiteBL
 from api.domains.transactions.features.promo import PromoBL
 from api.domains.transactions import TransactionBL
 from api.domains.products import ProductBL
+from ...addresses.types import AddressInput
 
 
 @strawberry.type
@@ -32,7 +32,7 @@ class OrderMutations:
     )
     async def create_order(
             self,
-            payload: CartInput,
+            payload: AddressInput,
             info: Info
     ) -> CreatedOrderIdType:
         """ Create order from cart """

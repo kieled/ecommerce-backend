@@ -4,7 +4,7 @@ from strawberry.types import Info
 from api.broker import rabbit_connection
 from shared.schemas import MessageSchema
 from ..bl import TransactionBL
-from api.domains.users.features.auth import IsAuthenticated
+from api.utils.graphql import IsAuthenticated
 
 
 @strawberry.type

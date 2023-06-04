@@ -2,7 +2,7 @@ import strawberry
 from strawberry.types import Info
 
 from ..types import RequisiteTypeItemInput, RequisitesTypeItemType, RequisiteTypeCreateInput
-from api.domains.users.features.auth import IsAdmin
+from api.utils.graphql import IsAdmin
 from ..bl import RequisiteTypeBL
 
 

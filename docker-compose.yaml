@@ -11,6 +11,8 @@ services:
   app:
     expose:
       - 8000
+    ports:
+      - "8000:8000"
     build:
       context: ./services/api
       dockerfile: ../../docker/api.Dockerfile
@@ -22,16 +24,18 @@ services:
     env_file:
       - .env
     volumes:
-      - ./services/api:/api
-      - ./lib/shared:/api/shared
-      - ./assets:/assets
+      - ./services/api:/app/api
+      - ./services/api/main.py:/app/main.py
+      - ./services/api/alembic.ini:/app/alembic.ini
+      - ./lib/shared:/app/shared
+      - ./assets:/app/assets
 
   consumer:
     expose:
       - 8000
     build:
-      context: ./services/api
-      dockerfile: ../../docker/api.Dockerfile
+      context: ./services/consumer
+      dockerfile: ../../docker/consumer.Dockerfile
     depends_on:
       rabbit:
         condition: service_healthy
@@ -40,9 +44,10 @@ services:
     env_file:
       - .env
     volumes:
-      - ./services/consumer:/consumer
-      - ./lib/shared:/consumer/shared
-      - ./assets:/assets
+      - ./services/consumer:/app/consumer
+      - ./services/consumer/main.py:/app/main.py
+      - ./lib/shared:/app/shared
+      - ./assets:/app/assets
 
   instagram:
     expose:
@@ -53,8 +58,9 @@ services:
     env_file:
       - .env
     volumes:
-      - ./services/inst:/inst
-      - ./assets:/assets
+      - ./services/inst:/app/inst
+      - ./services/inst/main.py:/app/main.py
+      - ./assets:/app/assets
 
   payment:
     expose:
@@ -65,8 +71,8 @@ services:
     env_file:
       - .env
     volumes:
-      - ./services/payment:/payment
-      - ./assets:/assets
+      - ./services/payment:/app/payment
+      - ./services/payment/main.py:/app/main.py
 
   rabbit:
     image: rabbitmq:3.11.16-management-alpine

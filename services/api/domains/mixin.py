@@ -1,4 +1,4 @@
-from typing import Sequence, TypeVar, Generic, Callable, Optional, TypeAlias
+from typing import Sequence, TypeVar, Generic, Callable, Optional, TypeAlias, Union
 from alchemy_graph import get_only_selected_fields
 from pydantic.generics import GenericModel
 from sqlalchemy import desc, delete, insert, update, select, func, Select, ColumnElement
@@ -6,8 +6,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import DeclarativeMeta
 from strawberry.types import Info
 
-T = TypeVar('T', bound=DeclarativeMeta)
-FilterType: TypeAlias = list[ColumnElement] | tuple[ColumnElement] | bool | any | None
+T = TypeVar('T', bound=type[DeclarativeMeta])
+FilterType: TypeAlias = Union[list[ColumnElement], tuple[ColumnElement], any]
 
 
 class ListType(GenericModel, Generic[T]):
@@ -34,9 +34,10 @@ class AbstractBL(Generic[T]):
         self.info = info
         try:
             self.sql = get_selected_sql(T, info)
-        except Exception:
+        except Exception as e:
+            print(e)
             self.sql = None
-        self.model = T
+        self.model: T = T
         self.page_size = page_size
         self.offset = (page - 1) * self.page_size
 
@@ -47,11 +48,11 @@ class AbstractBL(Generic[T]):
         return sql.order_by(desc(self.model.id))
 
     @staticmethod
-    async def _fetch_all(sql: Select, session: AsyncSession) -> Sequence[any]:
+    async def _fetch_all(sql: Select, session: AsyncSession):
         return (await session.execute(sql)).scalars().unique().all()
 
     @staticmethod
-    async def _fetch_first(sql: Select, session: AsyncSession) -> any:
+    async def _fetch_first(sql: Select, session: AsyncSession):
         return (await session.execute(sql)).scalars().unique().first()
 
     async def fetch_one(self, obj_id: int, session: AsyncSession) -> T:

@@ -4,7 +4,7 @@ from alchemy_graph import orm_to_strawberry
 from ..features.location import location_service, LocationType
 from ..types import UserType, HashPasswordType
 from ..bl import UsersBL
-from ..features.auth import hash_password, IsAdmin, get_user_ids, IsAuthenticated
+from api.utils.graphql import hash_password, IsAdmin, get_user_ids, IsAuthenticated
 
 
 @strawberry.type

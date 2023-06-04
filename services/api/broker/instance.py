@@ -31,6 +31,7 @@ class RabbitConnection:
                 }
             )
         except Exception as e:
+            print(e)
             await self.disconnect()
 
     async def send_messages(

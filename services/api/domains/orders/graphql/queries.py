@@ -3,7 +3,7 @@ from alchemy_graph import orm_to_strawberry
 
 from ..bl import OrderBL
 from ..types import OrderListType, OrderItemType
-from api.domains.users.features.auth import IsAdmin
+from api.utils.graphql import IsAdmin
 
 
 @strawberry.type

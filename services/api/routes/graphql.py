@@ -1,8 +1,9 @@
 import strawberry
-from strawberry.django.apps import StrawberryConfig
+from fastapi import Depends
+from fastapi_jwt_auth import AuthJWT
+from fastapi_jwt_auth.exceptions import AuthJWTException
 from strawberry.fastapi import GraphQLRouter
-
-from api.domains.users.features.auth import get_auth_context
+from strawberry.schema.config import StrawberryConfig
 
 from api.domains.addresses.graphql import AddressQuery
 from api.domains.categories.graphql import ProductCategoryQuery, ProductCategoryMutation
@@ -39,6 +40,20 @@ class Mutation(
     ProductCategoryMutation
 ):
     ...
+
+
+async def get_auth_context(
+        auth: AuthJWT = Depends()
+):
+    try:
+        auth.jwt_required()
+        user_id = int(auth.get_jwt_subject().split(',')[0])
+    except (AuthJWTException, ValueError):
+        user_id = None
+
+    return {
+        'user_id': user_id
+    }
 
 
 strawberry_config = StrawberryConfig(auto_camel_case=True)

@@ -1,5 +1,6 @@
 from fastapi import FastAPI, Form, HTTPException, status
 from payment.services import yandex_service
+import uvicorn
 
 app = FastAPI(redoc_url=None, docs_url=None, openapi_url=None, title='Payment Service')
 
@@ -16,3 +17,14 @@ def check_payment(
                 transaction_id=i
             )
     return HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail='Transaction not found')
+
+
+if __name__ == '__main__':
+    uvicorn.run(
+        'main:app',
+        port=8000,
+        log_level='debug',
+        use_colors=True,
+        host='0.0.0.0',
+        reload=True
+    )

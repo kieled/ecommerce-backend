@@ -5,13 +5,13 @@ from shared.localizations import telegram as localizations
 from shared.db import Order, Transaction, TransactionStatusEnum, cls_session
 from shared.schemas import MessageSchema
 
-from api.domains.users.features.auth import get_user_ids
+from api.utils.graphql import get_user_ids
 from api.domains.mixin import AbstractBL
-from api.domains.products.features.cart import CartInput
 from api.broker import rabbit_connection
 
 from . import sql
 from .types import UpdateOrderInput
+from ..addresses.types import AddressInput
 
 
 @cls_session
@@ -59,7 +59,7 @@ class OrderBL(AbstractBL[Order]):
             session=session
         )
 
-    async def create(self, payload: CartInput, transaction_id: int, session: AsyncSession = None):
+    async def create(self, payload: AddressInput, transaction_id: int, session: AsyncSession = None):
         temp_user_id, user_id = get_user_ids(self.info)
 
         await self.create_item([

@@ -9,10 +9,10 @@ class Router:
     def __init__(self):
         modules = list(filter(
             lambda x: x != '__init__',
-            map(lambda y: y.split('.')[0], os.listdir('tasks'))
+            map(lambda y: y.split('.')[0], os.listdir(os.path.join('consumer', 'tasks')))
         ))
         for module in modules:
-            imported = import_module(f'tasks.{module}')
+            imported = import_module(f'consumer.tasks.{module}')
             if not hasattr(imported, '__all__'):
                 continue
             self._routes[module] = {i: getattr(imported, i) for i in imported.__all__}

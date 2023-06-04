@@ -2,10 +2,9 @@ from sqlalchemy import select
 from sqlalchemy.orm import load_only, joinedload
 
 from shared.db import Product, ProductStock, ProductSize
-from .types import CartProductInput
 
 
-def cart(products: list[CartProductInput]):
+def cart(products):
     return select(Product).options(
         load_only(Product.title, Product.price),
         joinedload(Product.stocks).load_only(

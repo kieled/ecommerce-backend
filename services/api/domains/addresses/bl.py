@@ -1,10 +1,10 @@
 from alchemy_graph import strawberry_to_dict
 from sqlalchemy.ext.asyncio import AsyncSession
 from api.domains.mixin import AbstractBL
-from api.domains.users.features.auth import get_user_ids
+from api.utils.graphql import get_user_ids
 from shared.db import CustomerAddress, cls_session
 from . import sql
-from api.domains.products.features.cart import CartInput
+from .types import AddressInput
 
 
 @cls_session
@@ -20,7 +20,7 @@ class AddressBL(AbstractBL[CustomerAddress]):
 
     async def get_or_create(
             self,
-            payload: CartInput,
+            payload: AddressInput,
             temp_user_id: str | None,
             session: AsyncSession = None
     ) -> int | None:

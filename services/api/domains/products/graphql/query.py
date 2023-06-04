@@ -4,8 +4,8 @@ from strawberry.types import Info
 
 from ..bl import ProductBL
 from ..features.aliexpress_parser import ProductParsedType, aliexpress_parser
-from ..features.cart import CartProductInput, CartType, cart_products
-from api.domains.users.features.auth import IsAdmin
+from api.domains.products.features.cart import CartProductInput, CartType, cart_products
+from api.utils.graphql import IsAdmin
 from ..types import ProductListType, ProductItemType, ProductDetailType, PublicListType, PublicDetailType
 
 

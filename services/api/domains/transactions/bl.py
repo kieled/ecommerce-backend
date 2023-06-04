@@ -4,7 +4,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from shared.db import Transaction, TransactionStatusEnum, cls_session, Promo
 from .types import transaction_status_enum
 from . import sql
-from api.domains.users.features.auth import get_user_ids
+from api.utils.graphql import get_user_ids
 from api.domains.mixin import AbstractBL
 
 

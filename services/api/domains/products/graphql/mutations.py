@@ -7,7 +7,7 @@ from shared.schemas import MessageSchema
 from ..types import ProductCreateInput, ProductUpdateInput, CreatedProductType, \
     CreatedProductImageType
 from ..bl import ProductBL
-from ...users.features.auth import IsAdmin
+from api.utils.graphql import IsAdmin
 
 
 @strawberry.type

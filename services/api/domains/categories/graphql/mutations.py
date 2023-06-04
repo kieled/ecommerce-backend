@@ -3,7 +3,7 @@ from alchemy_graph import orm_to_strawberry, strawberry_to_dict
 
 from ..types import ProductCategoryInput, UpdateProductCategoryInput, ProductCategoryType
 from ..bl import ProductCategoryBL
-from api.domains.users.features.auth import IsAdmin
+from api.utils.graphql import IsAdmin
 
 
 @strawberry.type

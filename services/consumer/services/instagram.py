@@ -2,6 +2,7 @@ import os
 from dataclasses import dataclass
 import aiohttp
 from sqlalchemy import update
+
 from shared.db import Product, scoped_session
 from shared.localizations.instagram import description
 from shared.schemas import DescriptionSchema

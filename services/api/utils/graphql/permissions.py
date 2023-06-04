@@ -1,9 +1,11 @@
-from .config import AuthJWT
 from fastapi_jwt_auth.exceptions import AuthJWTException
 from strawberry import BasePermission
 from strawberry.types import Info
-from shared.db import UserTypeEnum
 from fastapi import Request
+
+from shared.db import UserTypeEnum
+
+from api.domains.users.features.auth import AuthJWT
 
 
 class IsAdmin(BasePermission):

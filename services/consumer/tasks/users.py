@@ -1,4 +1,5 @@
 from consumer.services import MigrationService
+
 from shared.db import scoped_session
 
 

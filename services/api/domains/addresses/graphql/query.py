@@ -1,7 +1,7 @@
 import strawberry
 from alchemy_graph import orm_to_strawberry
 from ..types import CustomerAddressType
-from api.domains.users.features.auth import IsAuthenticated
+from api.utils.graphql import IsAuthenticated
 from ..bl import AddressBL
 
 

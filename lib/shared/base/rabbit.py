@@ -7,6 +7,8 @@ class RabbitConfig(BaseSettings):
     RABBITMQ_HOST: str = 'rabbit'
     RABBITMQ_PORT: int = 5672
 
+    RABBITMQ_QUEUE: str = 'main'
+
     @property
     def url(self):
         return "amqp://{}:{}@{}:{}/".format(

@@ -1,4 +1,6 @@
 import strawberry
+from pydantic import BaseModel
+
 from .enums import user_type_enum
 
 
@@ -23,8 +25,14 @@ class TelegramUserType:
     first_name: str | None = None
 
 
+class SuperUserResponse(BaseModel):
+    id: int
+    username: str
+
+
 __all__ = [
     'TelegramUserType',
     'UserType',
     'HashPasswordType',
+    'SuperUserResponse',
 ]

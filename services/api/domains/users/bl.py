@@ -5,7 +5,8 @@ from .types import TelegramUserInput
 from shared.base import telegram_config
 from . import sql
 from shared.db import cls_session, User, UserTypeEnum
-from .features.auth import verify_password, get_tokens, assign_response, telegram_hash_check
+from api.utils.graphql import verify_password, get_tokens, assign_response, hash_password
+from .features.auth import telegram_hash_check
 from api.domains.mixin import AbstractBL
 
 
@@ -88,3 +89,13 @@ class UsersBL(AbstractBL[User]):
     def logout(self) -> None:
         self.auth.jwt_required()
         self.auth.unset_jwt_cookies()
+
+    async def create_super_user(self, username: str, password: str, session: AsyncSession = None) -> User:
+        user = await self._fetch_first(sql.user_by_username(username), session)
+        if user:
+            raise Exception('Already exists')
+        return await self.create_item({
+            'username': username,
+            'password': hash_password(password),
+            'type': UserTypeEnum.admin
+        }, session)

@@ -40,6 +40,7 @@ async def main() -> None:
         }
     )
     await queue.bind(exchange, queue_key)
+    print('Consumer successfully loaded')
     await queue.consume(process_message)
     try:
         await asyncio.Future()

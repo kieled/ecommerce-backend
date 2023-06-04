@@ -1,7 +1,7 @@
 from datetime import timedelta
 
 from shared.db import User
-from .config import AuthJWT
+from api.domains.users.features.auth import AuthJWT
 from shared.base import settings
 
 ACCESS_TOKEN_EXPIRES_IN = settings.ACCESS_TOKEN_EXPIRES_IN

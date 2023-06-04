@@ -2,7 +2,7 @@ import aiohttp
 from alchemy_graph import strawberry_to_dict
 from sqlalchemy.ext.asyncio import AsyncSession
 from shared.db import Product, ProductParam, cls_session
-from .features.cart import CartProductInput
+from api.domains.products.features.cart import CartProductInput
 from .features.images import prepare_images
 from .types import ProductCreateInput, ProductUpdateInput
 from api.domains.mixin import AbstractBL

@@ -2,11 +2,11 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from shared.db import session_wrap
 from . import sql
-from .types import CartProductInput, CartType, CartProductType
+from .types import CartType, CartProductType
 
 
 @session_wrap
-async def cart_products(products: list[CartProductInput], session: AsyncSession = None):
+async def cart_products(products, session: AsyncSession = None):
     result = (await session.execute(
         sql.cart(products)
     )).scalars().unique().all()

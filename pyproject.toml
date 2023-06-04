@@ -29,6 +29,7 @@ aio-pika = "^9.0.7"
 tinydb = "^4.7.1"
 aiofiles = "^23.1.0"
 types-aiofiles = "^23.1.0.3"
+uvicorn = "^0.22.0"
 
 
 [build-system]
