@@ -8,8 +8,8 @@ context manager for managing the lifespan of the application.
 ## :heavy_exclamation_mark: Requirements
 
 1. Docker (__>=23.0.4__) and docker compose plugin (__>=2.18.1__)
-2. 2GB+ RAM
-3. 10GB+ ROM
+2. 2GB RAM
+3. 5GB+ ROM
 
 ## :heavy_plus_sign: Installation
 
