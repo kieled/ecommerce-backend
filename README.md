@@ -1,9 +1,13 @@
-# Ecommerce graphql application
+<h1 align="center">Ecommerce graphql application</h1
 
 This repository contains code for a FastAPI application with various routers and queries implemented using the
 Strawberry library. The code provides an API for managing products, orders, users, addresses, and other related
 functionalities. It also includes middleware for handling CORS (Cross-Origin Resource Sharing) and an asynchronous
 context manager for managing the lifespan of the application.
+
+## :star2: Features
+
+Blank for now...  
 
 ## :heavy_exclamation_mark: Requirements
 
