@@ -2,6 +2,7 @@ from fastapi import APIRouter, Depends, Form
 from instagrapi import Client
 
 from inst.core import get_clients, album_upload_post
+from inst.core.storage import ClientStorage
 from inst.schemas import InstagramLink
 
 router = APIRouter(
@@ -15,7 +16,7 @@ router = APIRouter(
 async def album_upload(
         images: list[str] = Form(...),
         caption: str = Form(...),
-        client: Client = Depends(get_clients)
+        client: ClientStorage = Depends(get_clients)
 ) -> InstagramLink:
     media = await album_upload_post(client, images, caption=caption)
     return InstagramLink(

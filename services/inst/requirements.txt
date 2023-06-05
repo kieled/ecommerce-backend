@@ -3,6 +3,4 @@ uvicorn[standard]==0.22.0
 instagrapi>=1.17.1
 python-multipart==0.0.5
 Pillow==9.4.0
-ipdb==0.13.11
 aiofiles==23.1.0
-tinydb==4.7.1

@@ -1,10 +1,10 @@
 import aiofiles
 import os
 
-from instagrapi import Client
+from inst.core.storage import ClientStorage
 
 
-async def album_upload_post(cl: Client, image_paths: list[str], **kwargs):
+async def album_upload_post(cl: ClientStorage, image_paths: list[str], **kwargs):
     async with aiofiles.tempfile.TemporaryDirectory() as d:
         paths = []
         for i in range(len(image_paths)):

@@ -1,8 +1,6 @@
-from typing import Generator
-
-from .storages import client_storage
+from .storage import client_storage
 
 
-def get_clients() -> Generator:
-    with client_storage as c:
+async def get_clients():
+    async with client_storage as c:
         yield c
